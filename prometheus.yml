@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'argovis_core_api'
+    static_configs:
+      - targets: ['api:8080']
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names:
+            - atoc-argovis-dev
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app]
+        action: keep
+        regex: prom-api
