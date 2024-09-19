@@ -1,0 +1,31 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'argovis_core_api'
+    static_configs:
+      - targets: ['api:8080']
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names:
+            - atoc-argovis-dev
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app]
+        action: keep
+        regex: prom-api
+  - job_name: 'api-uptime'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://argovis-api.colorado.edu/ping
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
